@@ -3,6 +3,13 @@ import React,{ requireNativeComponent, Component, PropTypes, View } from 'react-
 class LineChart extends Component {
     constructor(props) {
         super(props);
+        this._onChange = this._onChange.bind(this);
+    }
+
+    _onChange(event: Event) {
+        if (this.props.onViewportChange) {
+            this.props.onViewportChange(event.nativeEvent.message)
+        }
     }
 
     render() {
@@ -43,7 +50,8 @@ LineChart.propTypes = {
     chartPadding:PropTypes.string,
     legend:PropTypes.object,
     viewCenter: PropTypes.array,
-    zoomTo: PropTypes.object
+    zoomTo: PropTypes.object,
+    onViewportChange: PropTypes.func,
 }
 
 var MPLineChart = requireNativeComponent('MPLineChart', LineChart);

@@ -1,26 +1,24 @@
 package cn.mandata.react_native_mpchart;
 
 import android.graphics.Color;
+import android.util.Log;
+import android.view.MotionEvent;
+import android.view.View;
 
+import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
-import com.facebook.react.uimanager.annotations.ReactProp;
-import com.facebook.react.uimanager.SimpleViewManager;
+import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
-import com.github.mikephil.charting.charts.BarChart;
-import com.github.mikephil.charting.charts.BarLineChartBase;
+import com.facebook.react.uimanager.annotations.ReactProp;
+import com.facebook.react.uimanager.events.RCTEventEmitter;
 import com.github.mikephil.charting.charts.LineChart;
-import com.github.mikephil.charting.components.AxisBase;
-import com.github.mikephil.charting.components.LimitLine;
-import com.github.mikephil.charting.components.YAxis;
-import com.github.mikephil.charting.data.BarData;
-import com.github.mikephil.charting.data.BarDataSet;
-import com.github.mikephil.charting.data.BarEntry;
-import com.github.mikephil.charting.data.DataSet;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
-import com.github.mikephil.charting.utils.ColorTemplate;
+import com.github.mikephil.charting.listener.ChartTouchListener;
+import com.github.mikephil.charting.listener.OnChartGestureListener;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -35,6 +33,7 @@ public class MPLineChartManager extends MPBarLineChartManager {
     private LineChart chart;
     private LineData data;
     private LineDataSet dataSet;
+    private ReactContext reactContext;
     @Override
     public String getName() {
         return this.CLASS_NAME;
@@ -43,7 +42,7 @@ public class MPLineChartManager extends MPBarLineChartManager {
     @Override
     protected LineChart createViewInstance(ThemedReactContext reactContext) {
         LineChart chart=new LineChart(reactContext);
-
+        this.reactContext = reactContext;
         return  chart;
     }
 
@@ -76,14 +75,6 @@ public class MPLineChartManager extends MPBarLineChartManager {
             if(config.hasKey("drawCircles")) dataSet.setDrawCircles(config.getBoolean("drawCircles"));
             if(config.hasKey("circleSize")) dataSet.setCircleSize((float) config.getDouble("circleSize"));
             if(config.hasKey("lineWidth")) dataSet.setLineWidth((float) config.getDouble("lineWidth"));
-            if(config.hasKey("colors")){
-                ReadableArray colorsArray = config.getArray("colors");
-                ArrayList<Integer> colors = new ArrayList<>();
-                for(int c = 0; c < colorsArray.size(); c++){
-                    colors.add(Color.parseColor(colorsArray.getString(c)));
-                }
-                dataSet.setColors(colors);
-            }else
             if(config.hasKey("color")) {
                 int[] colors=new int[]{Color.parseColor(config.getString("color"))};
                 dataSet.setColors(colors);
@@ -93,5 +84,36 @@ public class MPLineChartManager extends MPBarLineChartManager {
         chart.setBackgroundColor(Color.WHITE);
         chart.setData(chartData);
         chart.invalidate();
+
+        final View chartView = (View)chart;
+        chart.setOnChartGestureListener(new OnChartGestureListener() {
+            @Override
+            public void onChartGestureStart(MotionEvent motionEvent, ChartTouchListener.ChartGesture chartGesture) {}
+
+            @Override
+            public void onChartGestureEnd(MotionEvent motionEvent, ChartTouchListener.ChartGesture chartGesture) {
+                WritableMap event = Arguments.createMap();
+                event.putString("message", "Chart gesture ended!");
+                reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(chartView.getId(), "topChange", event);
+            }
+
+            @Override
+            public void onChartLongPressed(MotionEvent motionEvent) {}
+
+            @Override
+            public void onChartDoubleTapped(MotionEvent motionEvent) {}
+
+            @Override
+            public void onChartSingleTapped(MotionEvent motionEvent) {}
+
+            @Override
+            public void onChartFling(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {}
+
+            @Override
+            public void onChartScale(MotionEvent motionEvent, float v, float v1) {}
+
+            @Override
+            public void onChartTranslate(MotionEvent motionEvent, float v, float v1) {}
+        });
     }
 }
