@@ -93,7 +93,7 @@ public class MPLineChartManager extends MPBarLineChartManager {
             @Override
             public void onChartGestureEnd(MotionEvent motionEvent, ChartTouchListener.ChartGesture chartGesture) {
                 WritableMap event = Arguments.createMap();
-                event.putString("message", "Chart gesture ended!");
+                event.putString("message", "Chart gesture ended");
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(chartView.getId(), "topChange", event);
             }
 
