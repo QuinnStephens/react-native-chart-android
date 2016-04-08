@@ -14,7 +14,7 @@ class LineChart extends Component {
 
     render() {
         return (
-            <MPLineChart {...this.props}/>
+            <MPLineChart {...this.props} onChange={this._onChange}/>
         );
     }
 }
